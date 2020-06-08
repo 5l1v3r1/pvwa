@@ -42,33 +42,44 @@
   ignore_errors: yes
 
 - name: set secure vault password
+
   block:
+
     - name: set default value for vault_password
       set_fact:
         vault_password: ''
       when: vault_password is undefined
+
     - name: set default value for secure_vault_password
       set_fact:
         secure_vault_password: ''
       when: secure_vault_password is undefined
+
     - name: check if the user use 2 passwords
       fail:
         msg: "You must provide either vault_password or secure_vault_password parameter"
       when:
         - (vault_password != '')
         - (secure_vault_password != '')
+
     - name: convert to securestring
       win_shell: |
-        $secure_vault_password_object = ConvertTo-SecureString "{{ vault_password }}" -AsPlainText -Force
+        $secure_vault_password_object = ConvertTo-SecureString '{{ vault_password }}' -AsPlainText -Force
         $secure_vault_password_string = ConvertFrom-SecureString $secure_vault_password_object
-        write-output $secure_vault_password_string
+        Write-Output $secure_vault_password_string
       register: secure_vault_password_string
       when: vault_password != ''
+
+    - name: print svps variable
+      debug:
+        msg: "{{ secure_vault_password_string }}"
+
     - name: set varible for secured vault password
       set_fact:
         secure_vault_password: "{{ secure_vault_password_string.stdout_lines[0] }}"
         vault_password: ''
       when: secure_vault_password == ''
+
   when:
     - pvwa_registration
 
