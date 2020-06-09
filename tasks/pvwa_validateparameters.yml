@@ -55,6 +55,12 @@
         secure_vault_password: ''
       when: secure_vault_password is undefined
 
+    - name: print passwords
+      debug: "{{ item }}"
+      with_items:
+        - "{{ vault_password }}"
+        - "{{ secure_vault_password }}"
+
     - name: check if the user use 2 passwords
       fail:
         msg: "You must provide either vault_password or secure_vault_password parameter"
