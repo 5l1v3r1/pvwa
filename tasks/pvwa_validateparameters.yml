@@ -50,6 +50,10 @@
         vault_password: ''
       when: vault_password is undefined
 
+    - name: set default value for vault_password
+      set_fact:
+        second_vault_password: "{{ vault_password }}"
+
     - name: set default value for secure_vault_password
       set_fact:
         secure_vault_password: ''
@@ -58,8 +62,10 @@
     - name: print passwords
       debug: "{{ item }}"
       with_items:
-        - "{{ vault_password }}"
-        - "{{ secure_vault_password }}"
+        - "vault password - {{ vault_password }}"
+        - "secure_vault_password - {{ secure_vault_password }}"
+        - "second_vault_password - {{ second_vault_password }}"
+        - "ansible_connection - {{ ansible_connection }}"
 
     - name: check if the user use 2 passwords
       fail:
@@ -70,7 +76,7 @@
 
     - name: convert to securestring
       win_shell: |
-        $secure_vault_password_object = ConvertTo-SecureString '{{ vault_password }}' -AsPlainText -Force
+        $secure_vault_password_object = ConvertTo-SecureString '{{ second_vault_password }}' -AsPlainText -Force
         $secure_vault_password_string = ConvertFrom-SecureString $secure_vault_password_object
         Write-Output $secure_vault_password_string
       register: secure_vault_password_string
